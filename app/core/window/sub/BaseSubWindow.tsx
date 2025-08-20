@@ -1,4 +1,6 @@
+import type { ShallowRef } from "vue";
 import type { JSX } from "vue/jsx-runtime";
+import { animate } from 'animejs';
 
 /** 抽象子窗口类 */
 export default abstract class BaseSubWindow {
@@ -11,7 +13,12 @@ export default abstract class BaseSubWindow {
     // 窗口权限
     protected permissions: SubWindowPermissions;
     // 窗体内容
-    protected content: JSX.Element | null = null;
+    protected content: ShallowRef<JSX.Element | null> = shallowRef(null);
+
+    protected renderState = ref({
+        x: 0, y: 0,
+        width: 0, height: 0
+    })
 
     /**
      * @param title 窗口标题
@@ -31,7 +38,11 @@ export default abstract class BaseSubWindow {
         this.size = size;
         this.position = position;
         this.permissions = permissions;
-        this.content = content ?? null;
+        this.content.value = content ?? null;
+        this.renderState.value = {
+            ...size, ...position
+        }
+
     }
 
     /**
@@ -47,7 +58,7 @@ export default abstract class BaseSubWindow {
      * @param content 窗体内容
      */
     setContent(content: JSX.Element) {
-        this.content = content;
+        this.content.value = content;
     }
 
     /**
@@ -58,6 +69,35 @@ export default abstract class BaseSubWindow {
         return this.content;
     }
 
+    getWindowElement() {
+        let status: any = this.renderState.value;
+        if (status == undefined) status = this.renderState
+        return (
+            <div class="bg-base-100 rounded-md"
+                style={{
+                    position: "absolute",
+                    top: `${status.y}px`,
+                    left: `${status.x}px`,
+                    width: `${status.width}px`,
+                    height: `${status.height}px`,
+                    overflow: "hidden"
+                }}
+            >
+                {/* 内容 */}
+                <div
+                    style={{
+                        width: "100%",
+                        height: `100%`,
+                        overflow: "auto",
+                        padding: "8px"
+                    }}
+                >
+                    {this.content}
+                </div>
+            </div>
+        );
+    }
+
     /**
      * 设置窗口尺寸
      * @param size 窗口尺寸
@@ -65,6 +105,8 @@ export default abstract class BaseSubWindow {
     setSize(size: SubWindowSize) {
         if (!this.permissions.allow_resize) throw new Error(`当前窗口${this.title}，不允许设置尺寸`)
         this.size = size;
+        this.renderState.value.width = size.width;
+        this.renderState.value.height = size.height;
     }
 
     /**
@@ -74,6 +116,29 @@ export default abstract class BaseSubWindow {
     setPosition(position: SubWindowPosition) {
         if (!this.permissions.allow_move) throw new Error(`当前窗口${this.title}，不允许移动`)
         this.position = position;
+        this.renderState.value.x = position.x;
+        this.renderState.value.y = position.y;
+    }
+
+    /**
+     * 动画过渡
+     * @param target 目标状态
+     * @param duration 动画时长
+     */
+    animateTo(target: Partial<SubWindowPosition & SubWindowSize>, duration = 300) {
+        this.size = {
+            width: target.width ?? this.size.width,
+            height: target.height ?? this.size.height
+        };
+        this.position = {
+            x: target.x ?? this.position.x,
+            y: target.y ?? this.position.y
+        };
+        return animate(this.renderState.value, {
+            ...target,
+            duration,
+            ease: 'inOutBack',
+        })
     }
 
     /**
@@ -87,9 +152,6 @@ export default abstract class BaseSubWindow {
             [permission]: value
         }
     }
-
-
-
 }
 
 /** 子窗口尺寸 */

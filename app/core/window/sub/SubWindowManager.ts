@@ -31,7 +31,7 @@ export default class SubWindowManager {
      * @param window 子窗口
      */
     register(window: BaseSubWindow) {
-        if (this.windows.has(window.getTitle())) throw new Error("已经有同名子窗口存在");
+        // if (this.windows.has(window.getTitle())) throw new Error("已经有同名子窗口存在");
         this.windows.set(window.getTitle(), window);
         this.emit('register', window);
     }
