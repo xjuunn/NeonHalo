@@ -110,6 +110,14 @@ export default abstract class BaseSubWindow {
     }
 
     /**
+     * 获取子窗口尺寸
+     * @returns 子窗口尺寸
+     */
+    getSize() {
+        return this.size;
+    }
+
+    /**
      * 设置窗口位置
      * @param position 窗口位置
      */
@@ -118,6 +126,14 @@ export default abstract class BaseSubWindow {
         this.position = position;
         this.renderState.value.x = position.x;
         this.renderState.value.y = position.y;
+    }
+
+    /**
+     * 获取子窗口的位置
+     * @returns 子窗口位置
+     */
+    getPosition() {
+        return this.position;
     }
 
     /**
