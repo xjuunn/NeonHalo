@@ -11,6 +11,9 @@
     "core:window:allow-set-position",
     "core:window:allow-set-ignore-cursor-events",
     "core:window:allow-set-cursor-visible",
-    "core:window:allow-maximize"
+    "core:window:allow-maximize",
+    "core:window:allow-set-always-on-top",
+    "core:window:allow-start-dragging",
+    "core:window:allow-set-resizable"
   ]
 }
